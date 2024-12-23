@@ -42,12 +42,11 @@ namespace DarkNaku.Admob {
         private BannerView _bannerView;
         private InterstitialAd _interstitialAd;
         private RewardedAd _rewardedAd;
-        private System.Action _onCloseInterstitialAd;
         private System.Action<bool> _onCloseRewardAd;
         private bool _isRewardedCompleted;
 
         public static void Initialize() => Instance._Initialize();
-        public static void ShowInterstitialAd(System.Action onClose) => Instance._ShowInterstitialAd(onClose);
+        public static void ShowInterstitialAd() => Instance._ShowInterstitialAd();
         public static void ShowRewardedAd(System.Action<bool> onClose) => Instance._ShowRewardedAd(onClose);
         
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -123,7 +122,6 @@ namespace DarkNaku.Admob {
             if (_interstitialAd != null) {
                 _interstitialAd.Destroy();
                 _interstitialAd = null;
-                _onCloseInterstitialAd = null;
             }
 
             InterstitialAd.Load(AdmobConfig.AdmobInterstialId, new AdRequest(), (ad, error) => {
@@ -146,28 +144,21 @@ namespace DarkNaku.Admob {
             interstitialAd.OnAdClicked += () => Debug.Log("[Admob] Interstitial : Clicked.");
             interstitialAd.OnAdFullScreenContentOpened += () => Debug.Log("[Admob] Interstitial : Full screen content opened.");
             interstitialAd.OnAdFullScreenContentClosed += () => {
-                _onCloseInterstitialAd?.Invoke();
-
                 LoadInterstitialAd();
 
                 Debug.Log("[Admob] Interstitial : Full screen content closed.");
             };
 
             interstitialAd.OnAdFullScreenContentFailed += (AdError error) => {
-                _onCloseInterstitialAd?.Invoke();
-
                 LoadInterstitialAd();
 
                 Debug.LogError($"[Admob] Interstitial : Failed to open full screen content - {error}");
             };
         }
 
-        private void _ShowInterstitialAd(System.Action onClose) {
+        private void _ShowInterstitialAd() {
             if (_interstitialAd != null && _interstitialAd.CanShowAd()) {
-                _onCloseInterstitialAd = onClose;
                 _interstitialAd.Show();
-            } else {
-                onClose?.Invoke();
             }
         }
 
