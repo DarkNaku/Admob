@@ -42,11 +42,14 @@ namespace DarkNaku.Admob {
         private BannerView _bannerView;
         private InterstitialAd _interstitialAd;
         private RewardedAd _rewardedAd;
+        private System.Action _onCloseInterstitialAd;
         private System.Action<bool> _onCloseRewardAd;
+        private bool _isInterstitialAdClosed;
+        private bool _isRewardedAdClosed;
         private bool _isRewardedCompleted;
 
         public static void Initialize() => Instance._Initialize();
-        public static void ShowInterstitialAd() => Instance._ShowInterstitialAd();
+        public static void ShowInterstitialAd(System.Action onClose) => Instance._ShowInterstitialAd(onClose);
         public static void ShowRewardedAd(System.Action<bool> onClose) => Instance._ShowRewardedAd(onClose);
         
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -58,6 +61,18 @@ namespace DarkNaku.Admob {
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void OnBeforeSceneLoad() {
             if (AdmobConfig.InitializeOnStart) Initialize();
+        }
+
+        private void Update() {
+            if (_onCloseInterstitialAd != null) {
+                _onCloseInterstitialAd?.Invoke();
+                _onCloseInterstitialAd = null;
+            }
+
+            if (_onCloseRewardAd != null) {
+                _onCloseRewardAd?.Invoke(_isRewardedCompleted);
+                _onCloseRewardAd = null;
+            }
         }
 
         private void _Initialize() {
@@ -144,20 +159,26 @@ namespace DarkNaku.Admob {
             interstitialAd.OnAdClicked += () => Debug.Log("[Admob] Interstitial : Clicked.");
             interstitialAd.OnAdFullScreenContentOpened += () => Debug.Log("[Admob] Interstitial : Full screen content opened.");
             interstitialAd.OnAdFullScreenContentClosed += () => {
+                _isInterstitialAdClosed = true;
+
                 LoadInterstitialAd();
 
                 Debug.Log("[Admob] Interstitial : Full screen content closed.");
             };
 
             interstitialAd.OnAdFullScreenContentFailed += (AdError error) => {
+                _isInterstitialAdClosed = true;
+
                 LoadInterstitialAd();
 
                 Debug.LogError($"[Admob] Interstitial : Failed to open full screen content - {error}");
             };
         }
 
-        private void _ShowInterstitialAd() {
+        private void _ShowInterstitialAd(System.Action onClose) {
             if (_interstitialAd != null && _interstitialAd.CanShowAd()) {
+                _isInterstitialAdClosed = false;
+                _onCloseInterstitialAd = onClose;
                 _interstitialAd.Show();
             }
         }
@@ -189,7 +210,7 @@ namespace DarkNaku.Admob {
             ad.OnAdFullScreenContentOpened += () => Debug.Log("[Admob] Rewarded : Full screen content opened.");
 
             ad.OnAdFullScreenContentClosed += () => {
-                _onCloseRewardAd?.Invoke(_isRewardedCompleted);
+                _isRewardedAdClosed = true;
 
                 LoadRewardedAd();
 
@@ -197,7 +218,7 @@ namespace DarkNaku.Admob {
             };
 
             ad.OnAdFullScreenContentFailed += (error) => {
-                _onCloseRewardAd?.Invoke(_isRewardedCompleted);
+                _isRewardedAdClosed = true;
 
                 LoadRewardedAd();
 
@@ -207,8 +228,9 @@ namespace DarkNaku.Admob {
 
         private void _ShowRewardedAd(System.Action<bool> onClose) {
             if (_rewardedAd != null && _rewardedAd.CanShowAd()) {
-                _onCloseRewardAd = onClose;
+                _isRewardedAdClosed = false;
                 _isRewardedCompleted = false;
+                _onCloseRewardAd = onClose;
                 
                 _rewardedAd.Show((Reward reward) => {
                     _isRewardedCompleted = true;
