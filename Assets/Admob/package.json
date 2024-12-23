@@ -1,0 +1,8 @@
+{
+  "name": "com.darknaku.admob",
+  "displayName": "Admob",
+  "version": "0.1.0",
+  "unity": "2018.3",
+  "author": "DarkNaku",
+  "description": "DarkNaku's Admob Package - This is a package for Google Admob."
+}
