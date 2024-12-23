@@ -64,14 +64,16 @@ namespace DarkNaku.Admob {
         }
 
         private void Update() {
-            if (_onCloseInterstitialAd != null) {
+            if (_onCloseInterstitialAd != null && _isInterstitialAdClosed) {
                 _onCloseInterstitialAd?.Invoke();
                 _onCloseInterstitialAd = null;
+                _isInterstitialAdClosed = false;
             }
 
-            if (_onCloseRewardAd != null) {
+            if (_onCloseRewardAd != null && _isRewardedAdClosed) {
                 _onCloseRewardAd?.Invoke(_isRewardedCompleted);
                 _onCloseRewardAd = null;
+                _isRewardedAdClosed = false;
             }
         }
 
