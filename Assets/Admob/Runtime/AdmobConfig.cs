@@ -15,6 +15,9 @@ namespace DarkNaku.Admob {
         [SerializeField] private string _admobApBannerId = "ca-app-pub-3940256099942544/6300978111";
         [SerializeField] private string _admobApInterstitialId = "ca-app-pub-3940256099942544/1033173712";
         [SerializeField] private string _admobApRewardId = "ca-app-pub-3940256099942544/5224354917";
+        [SerializeField] private string _admobAmBannerId = "ca-app-pub-3940256099942544/6300978111";
+        [SerializeField] private string _admobAmInterstitialId = "ca-app-pub-3940256099942544/1033173712";
+        [SerializeField] private string _admobAmRewardId = "ca-app-pub-3940256099942544/5224354917";
 
         public static AdmobConfig Instance {
             get {
@@ -53,9 +56,15 @@ namespace DarkNaku.Admob {
         public static bool RewardedEnabled => Instance._rewardedEnabled;
 
 #if UNITY_ANDROID
+    #if AMAZON
         public static string AdmobBannerId => Instance._admobGoBannerId;
         public static string AdmobInterstialId => Instance._admobGoInterstitialId;
         public static string AdmobRewardId => Instance._admobGoRewardId;
+    #else
+        public static string AdmobBannerId => Instance._admobAmBannerId;
+        public static string AdmobInterstialId => Instance._admobAmInterstitialId;
+        public static string AdmobRewardId => Instance._admobAmRewardId;
+    #endif
 #elif UNITY_IOS
         public static string AdmobBannerId => Instance._admobApBannerId;
         public static string AdmobInterstialId => Instance._admobApInterstitialId;
