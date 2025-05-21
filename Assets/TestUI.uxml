@@ -1,0 +1,8 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <ui:VisualElement style="flex-grow: 1; justify-content: space-around; align-self: stretch;">
+        <ui:VisualElement style="flex-grow: 1; flex-direction: column; height: auto; align-self: stretch; justify-content: flex-start; align-items: flex-end; max-height: none; min-height: auto;">
+            <ui:Button text="전면광고노출" parse-escape-sequences="true" display-tooltip-when-elided="true" name="InterstitialShowButton" style="height: 80px; width: 240px; font-size: 32px;" />
+            <ui:Button text="보상광고노출" parse-escape-sequences="true" display-tooltip-when-elided="true" name="RewardShowButton" style="width: 240px; height: 80px; font-size: 32px;" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
