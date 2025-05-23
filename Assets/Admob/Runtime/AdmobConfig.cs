@@ -57,13 +57,13 @@ namespace DarkNaku.Admob {
 
 #if UNITY_ANDROID
     #if AMAZON
-        public static string AdmobBannerId => Instance._admobGoBannerId;
-        public static string AdmobInterstialId => Instance._admobGoInterstitialId;
-        public static string AdmobRewardId => Instance._admobGoRewardId;
-    #else
         public static string AdmobBannerId => Instance._admobAmBannerId;
         public static string AdmobInterstialId => Instance._admobAmInterstitialId;
         public static string AdmobRewardId => Instance._admobAmRewardId;
+    #else
+        public static string AdmobBannerId => Instance._admobGoBannerId;
+        public static string AdmobInterstialId => Instance._admobGoInterstitialId;
+        public static string AdmobRewardId => Instance._admobGoRewardId;
     #endif
 #elif UNITY_IOS
         public static string AdmobBannerId => Instance._admobApBannerId;
