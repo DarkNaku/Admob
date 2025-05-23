@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -5,7 +6,11 @@ using GoogleMobileAds.Api;
 using UnityEngine;
 
 namespace DarkNaku.Admob {
-    public class Admob : MonoBehaviour {
+    public interface IDispatcher {
+        void Enqueue(System.Action action);
+    }
+
+    public class Admob : MonoBehaviour, IDispatcher {
         public static Admob Instance {
             get {
                 if (_isDestroyed) return null;
@@ -43,6 +48,7 @@ namespace DarkNaku.Admob {
         private AdmobBanner _banner;
         private AdmobInterstitial _interstitial;
         private AdmobReward _reward;
+        private Queue<Action> _dispatchQueue = new();
 
         public static void Initialize() => Instance._Initialize();
         public static void LoadBanner() => Instance._LoadBanner();
@@ -62,6 +68,14 @@ namespace DarkNaku.Admob {
             if (AdmobConfig.InitializeOnStart) Initialize();
         }
 
+        public void Enqueue(Action action) {
+            if (action == null) return;
+
+            lock (_dispatchQueue) {
+                _dispatchQueue.Enqueue(action);
+            }
+        }
+
         private void Awake() {
             if (_instance == null) {
                 _instance = this;
@@ -70,6 +84,18 @@ namespace DarkNaku.Admob {
                 Debug.LogWarningFormat("[Admob] Instance Duplicated - {0}", name);
                 Destroy(gameObject);
                 return;
+            }
+        }
+
+        private void Update() {
+            while (_dispatchQueue.Count > 0) {
+                Action action;
+
+                lock (_dispatchQueue) {
+                    action = _dispatchQueue.Dequeue();
+                }
+
+                action?.Invoke();
             }
         }
 
@@ -122,11 +148,11 @@ namespace DarkNaku.Admob {
         }
 
         private void _LoadBanner() {
-            _banner ??= new AdmobBanner(AdmobConfig.AdmobBannerId, AdSize.Banner, AdPosition.Bottom);
+            _banner ??= new AdmobBanner(this, AdmobConfig.AdmobBannerId, AdSize.Banner, AdPosition.Bottom);
         }
 
         private void _LoadInterstitial() {
-            _interstitial ??= new AdmobInterstitial(AdmobConfig.AdmobInterstialId);
+            _interstitial ??= new AdmobInterstitial(this, AdmobConfig.AdmobInterstialId);
         }
 
         private void _ShowInterstitial(System.Action onClose) {
@@ -138,7 +164,7 @@ namespace DarkNaku.Admob {
         }
 
         private void _LoadReward() {
-            _reward ??= new AdmobReward(AdmobConfig.AdmobRewardId);
+            _reward ??= new AdmobReward(this, AdmobConfig.AdmobRewardId);
         }
 
         private void _ShowReward(System.Action<bool> onClose) {

@@ -5,96 +5,100 @@ using DarkNaku.Admob;
 using GoogleMobileAds.Api;
 using UnityEngine;
 
-public class AdmobReward : IDisposable {
-    public bool IsLoaded => _rewardedAd != null && _rewardedAd.CanShowAd();
+namespace DarkNaku.Admob {
+    public class AdmobReward : IDisposable {
+        public bool IsLoaded => _rewardedAd != null && _rewardedAd.CanShowAd();
 
-    private string _adUnitId;
-    private RewardedAd _rewardedAd;
-    private Action<bool> _onClose;
-    private bool _isRewardCompleted;
+        private string _adUnitId;
+        private RewardedAd _rewardedAd;
+        private Action<bool> _onClose;
+        private bool _isRewardCompleted;
+        private IDispatcher _dispatcher;
 
-    public AdmobReward(string adUnitId) {
-        _adUnitId = adUnitId;
+        public AdmobReward(IDispatcher dispatcher, string adUnitId) {
+            _dispatcher = dispatcher;
+            _adUnitId = adUnitId;
 
-        Load();
-    }
-
-    public void Dispose() {
-    }
-
-    public void Show(Action<bool> onClose) {
-        if (_rewardedAd == null) {
-            Debug.LogError("[Admob-Reward] Show : Rewarded ad is not loaded.");
-            return;
+            Load();
         }
 
-        if (_rewardedAd.CanShowAd()) {
-            _isRewardCompleted = false;
-            _rewardedAd.Show(_ => _isRewardCompleted = true);
-        } else {
-            Debug.LogError("[Admob-Reward] Show : Rewarded ad is not loaded.");
+        public void Dispose() {
         }
 
-        _onClose = onClose;
-    }
+        public void Show(Action<bool> onClose) {
+            if (_rewardedAd == null) {
+                Debug.LogError("[Admob-Reward] Show : Rewarded ad is not loaded.");
+                return;
+            }
 
-    private void Load() {
-        if (_rewardedAd != null) {
-            _rewardedAd.Destroy();
-            _rewardedAd = null;
+            if (_rewardedAd.CanShowAd()) {
+                _isRewardCompleted = false;
+                _rewardedAd.Show(_ => _isRewardCompleted = true);
+            } else {
+                Debug.LogError("[Admob-Reward] Show : Rewarded ad is not loaded.");
+            }
+
+            _onClose = onClose;
         }
 
-        RewardedAd.Load(_adUnitId, new AdRequest(), OnLoaded);
-    }
+        private void Load() {
+            if (_rewardedAd != null) {
+                _rewardedAd.Destroy();
+                _rewardedAd = null;
+            }
 
-    private void OnLoaded(RewardedAd ad, LoadAdError error) {
-        if (error != null || ad == null) {
-            Debug.LogError($"[Admob-Reward] Load : Initialize failed - {error}");
-            return;
+            RewardedAd.Load(_adUnitId, new AdRequest(), OnLoaded);
         }
 
-        ad.OnAdPaid += OnAdPaid;
-        ad.OnAdImpressionRecorded += OnAdImpressionRecorded;
-        ad.OnAdClicked += OnAdClicked;
-        ad.OnAdFullScreenContentOpened += OnAdFullScreenContentOpened;
-        ad.OnAdFullScreenContentClosed += OnAdFullScreenContentClosed;
-        ad.OnAdFullScreenContentFailed += OnAdFullScreenContentFailed;
+        private void OnLoaded(RewardedAd ad, LoadAdError error) {
+            if (error != null || ad == null) {
+                Debug.LogError($"[Admob-Reward] Load : Initialize failed - {error}");
+                return;
+            }
 
-        _rewardedAd = ad;
+            ad.OnAdPaid += OnAdPaid;
+            ad.OnAdImpressionRecorded += OnAdImpressionRecorded;
+            ad.OnAdClicked += OnAdClicked;
+            ad.OnAdFullScreenContentOpened += OnAdFullScreenContentOpened;
+            ad.OnAdFullScreenContentClosed += OnAdFullScreenContentClosed;
+            ad.OnAdFullScreenContentFailed += OnAdFullScreenContentFailed;
 
-        Debug.Log($"[Admob-Reward] OnLoaded - {ad.GetResponseInfo()}");
-    }
+            _rewardedAd = ad;
 
-    private void OnAdPaid(AdValue adValue) {
-        Debug.Log($"[Admob-Reward] OnAdPaid : {adValue.Value} - {adValue.CurrencyCode}.");
-    }
+            Debug.Log($"[Admob-Reward] OnLoaded - {ad.GetResponseInfo()}");
+        }
 
-    private void OnAdImpressionRecorded() {
-        Debug.Log("[Admob-Reward] OnAdImpressionRecorded.");
-    }
+        private void OnAdPaid(AdValue adValue) {
+            Debug.Log($"[Admob-Reward] OnAdPaid : {adValue.Value} - {adValue.CurrencyCode}.");
+        }
 
-    private void OnAdClicked() {
-        Debug.Log("[Admob-Reward] OnAdClicked.");
-    }
+        private void OnAdImpressionRecorded() {
+            Debug.Log("[Admob-Reward] OnAdImpressionRecorded.");
+        }
 
-    private void OnAdFullScreenContentOpened() {
-        Debug.Log("[Admob-Reward] OnAdFullScreenContentOpened.");
-    }
+        private void OnAdClicked() {
+            Debug.Log("[Admob-Reward] OnAdClicked.");
+        }
 
-    private void OnAdFullScreenContentClosed() {
-        _onClose?.Invoke(_isRewardCompleted);
+        private void OnAdFullScreenContentOpened() {
+            Debug.Log("[Admob-Reward] OnAdFullScreenContentOpened.");
+        }
 
-        Load();
+        private void OnAdFullScreenContentClosed() {
+            _dispatcher?.Enqueue(() => _onClose?.Invoke(_isRewardCompleted));
 
-        Debug.Log("[Admob-Reward] OnAdFullScreenContentClosed.");
-    }
+            Load();
+
+            Debug.Log("[Admob-Reward] OnAdFullScreenContentClosed.");
+        }
 
 
-    private void OnAdFullScreenContentFailed(AdError error) {
-        _onClose?.Invoke(false);
+        private void OnAdFullScreenContentFailed(AdError error) {
+            _dispatcher?.Enqueue(() => _onClose?.Invoke(false));
 
-        Load();
+            Load();
 
-        Debug.LogError($"[Admob-Reward] OnAdFullScreenContentFailed - {error}.");
+            Debug.LogError($"[Admob-Reward] OnAdFullScreenContentFailed - {error}.");
+        }
     }
 }
