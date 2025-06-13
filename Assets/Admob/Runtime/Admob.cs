@@ -116,6 +116,10 @@ namespace DarkNaku.Admob {
 
             var isCompleted = new TaskCompletionSource<bool>();
 
+            var requestConfiguration = new RequestConfiguration();
+            requestConfiguration.TestDeviceIds.AddRange(AdmobConfig.TestDeviceIDs);
+            MobileAds.SetRequestConfiguration(requestConfiguration);
+
             MobileAds.Initialize((initStatus) => {
                 Dictionary<string, AdapterStatus> map = initStatus.getAdapterStatusMap();
 
