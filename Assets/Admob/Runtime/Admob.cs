@@ -52,10 +52,10 @@ namespace DarkNaku.Admob {
 
         public static void Initialize() => Instance._Initialize();
         public static void LoadBanner() => Instance._LoadBanner();
-        public static void IsElapsedInterstitial(TimeSpan timeSpan) => Instance._IsElapsedInterstitial(timeSpan);
+        public static bool IsElapsedInterstitial(TimeSpan timeSpan) => Instance._IsElapsedInterstitial(timeSpan);
         public static void LoadInterstitial() => Instance._LoadInterstitial();
         public static void ShowInterstitial(System.Action onClose) => Instance._ShowInterstitial(onClose);
-        public static void IsElapsedReward(TimeSpan timeSpan) => Instance._IsElapsedReward(timeSpan);
+        public static bool IsElapsedReward(TimeSpan timeSpan) => Instance._IsElapsedReward(timeSpan);
         public static void LoadReward() => Instance._LoadReward();
         public static void ShowReward(System.Action<bool> onClose) => Instance._ShowReward(onClose);
 
