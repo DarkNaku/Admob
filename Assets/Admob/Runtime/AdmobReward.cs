@@ -43,7 +43,7 @@ namespace DarkNaku.Admob {
             _onClose = onClose;
         }
         
-        public bool IsElapsed(TimeSpan timeSpan) => _watchedTime + timeSpan > DateTime.Now;
+        public bool IsElapsed(TimeSpan timeSpan) => DateTime.Now > _watchedTime.Add(timeSpan);
 
         private void Load() {
             if (_rewardedAd != null) {
