@@ -12,10 +12,12 @@ namespace DarkNaku.Admob {
         private string _adUnitId;
         private Action _onClose;
         private IDispatcher _dispatcher;
+        private DateTime _watchedTime;
 
         public AdmobInterstitial(IDispatcher dispatcher, string adUnitId) {
             _dispatcher = dispatcher;
             _adUnitId = adUnitId;
+            _watchedTime = DateTime.Now;
 
             Load();
 
@@ -43,6 +45,8 @@ namespace DarkNaku.Admob {
 
             _onClose = onClose;
         }
+
+        public bool IsElapsed(TimeSpan timeSpan) => _watchedTime + timeSpan > DateTime.Now;
 
         private void Load() {
             if (_interstitialAd != null) {
@@ -91,7 +95,9 @@ namespace DarkNaku.Admob {
             _dispatcher?.Enqueue(() => _onClose?.Invoke());
 
             Load();
-
+            
+            _watchedTime = DateTime.Now;
+            
             Debug.Log("[Admob-Interstitial] OnAdFullScreenContentClosed.");
         }
 

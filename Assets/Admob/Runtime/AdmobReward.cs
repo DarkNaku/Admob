@@ -14,10 +14,12 @@ namespace DarkNaku.Admob {
         private Action<bool> _onClose;
         private bool _isRewardCompleted;
         private IDispatcher _dispatcher;
+        private DateTime _watchedTime;
 
         public AdmobReward(IDispatcher dispatcher, string adUnitId) {
             _dispatcher = dispatcher;
             _adUnitId = adUnitId;
+            _watchedTime = DateTime.Now;
 
             Load();
         }
@@ -40,6 +42,8 @@ namespace DarkNaku.Admob {
 
             _onClose = onClose;
         }
+        
+        public bool IsElapsed(TimeSpan timeSpan) => _watchedTime + timeSpan > DateTime.Now;
 
         private void Load() {
             if (_rewardedAd != null) {

@@ -52,8 +52,10 @@ namespace DarkNaku.Admob {
 
         public static void Initialize() => Instance._Initialize();
         public static void LoadBanner() => Instance._LoadBanner();
+        public static void IsElapsedInterstitial(TimeSpan timeSpan) => Instance._IsElapsedInterstitial(timeSpan);
         public static void LoadInterstitial() => Instance._LoadInterstitial();
         public static void ShowInterstitial(System.Action onClose) => Instance._ShowInterstitial(onClose);
+        public static void IsElapsedReward(TimeSpan timeSpan) => Instance._IsElapsedReward(timeSpan);
         public static void LoadReward() => Instance._LoadReward();
         public static void ShowReward(System.Action<bool> onClose) => Instance._ShowReward(onClose);
 
@@ -155,6 +157,14 @@ namespace DarkNaku.Admob {
             _banner ??= new AdmobBanner(this, AdmobConfig.AdmobBannerId, AdSize.Banner, AdPosition.Bottom);
         }
 
+        private bool _IsElapsedInterstitial(TimeSpan timeSpan) {
+            if (_interstitial != null && _interstitial.IsLoaded) {
+                return _interstitial.IsElapsed(timeSpan);
+            } else {
+                return false;
+            }
+        }
+
         private void _LoadInterstitial() {
             _interstitial ??= new AdmobInterstitial(this, AdmobConfig.AdmobInterstialId);
         }
@@ -164,6 +174,14 @@ namespace DarkNaku.Admob {
                 _interstitial.Show(onClose);
             } else {
                 onClose?.Invoke();
+            }
+        }
+        
+        private bool _IsElapsedReward(TimeSpan timeSpan) {
+            if (_reward != null && _reward.IsLoaded) {
+                return _reward.IsElapsed(timeSpan);
+            } else {
+                return false;
             }
         }
 
